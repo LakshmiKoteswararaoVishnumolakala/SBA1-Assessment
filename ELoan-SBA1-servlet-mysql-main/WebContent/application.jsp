@@ -16,6 +16,7 @@
 </script>
 <jsp:include page="header.jsp"/>
 
+
 <hr/>
 <div align="right"><a href="userhome1.jsp">Go Back to Home Page</a></div>
 	<%
@@ -23,7 +24,11 @@
 	%>
 <div align=center>
 	<h2>New Loan Application Request</h2>			
-	<form action="applicationConfirmation" method="post">	
+		
+  	<% if(request.getAttribute("state").equals("new") ){ 
+		//request.setAttribute("state", "submitted");
+	%>
+	<form action="user?action=placeloan" method="post">	
 	   <div>
 	     <label>Loan Application #</label>
   		<input type="text" name="LoanNumber" value="<%=loanApplicationNumber %>" readonly/>
@@ -80,7 +85,29 @@
 		<div>
 			<input type ="submit" value ="Apply"/>
 		</div>		
+		<p>Loan details submitted successfully !!</p>
+			<p>Application ID : <%=loanApplicationNumber %></p>
 	</form>
+	  <% } else 
+	  { 
+		String state = request.getAttribute("state").toString();
+	  	out.println("-------------------");
+		if(state.equalsIgnoreCase("submitted"))
+		{
+		
+		%>
+			<p>Loan details submitted successfully !!</p>
+			<p>Application ID : <%=loanApplicationNumber %></p>
+		<% 
+		}
+		else
+		{ %>
+			<p>Loan details submission Unsuccessfully, please try again. !!</p>
+			
+	<% } %>
+		
+	<a href="userhome1.jsp">Navigate Back</a>
+	<% } %>
 </div>
 <hr/>
 <jsp:include page="footer.jsp"/>

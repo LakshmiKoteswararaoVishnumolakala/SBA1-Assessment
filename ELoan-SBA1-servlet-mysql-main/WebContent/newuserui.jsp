@@ -13,6 +13,7 @@
 <jsp:include page="header.jsp"/>
 <hr/>
 <div align ="center">
+<div align="right"><a href="index.jsp">Go Back to Login Page</a></div>
 	<h2>New User Registration</h2>
 	<form action="user?action=registernewuser" method="post">		
 		<div>

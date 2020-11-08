@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -16,6 +17,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.iiht.evaluation.eloan.dao.ConnectionDao;
 import com.iiht.evaluation.eloan.model.ApprovedLoan;
@@ -98,54 +100,75 @@ public class UserController extends HttpServlet {
 		/* write the code to validate the user */
 		//connDao.connect();			
 		//System.out.println(connDao.UserID);
-		String loginid = request.getParameter("UserID");
+		String UserID = request.getParameter("UserID");
 		String Password = request.getParameter("Password");
-		String RelationShip = request.getParameter("BankRelationship");		
-		PrintWriter writer=response.getWriter();
-		
+		String RelationShip = request.getParameter("BankRelationship");
+		//PrintWriter writer=response.getWriter();
+	//	HttpSession session = request.getSession();
 		
 		if (RelationShip.contentEquals("User"))
 		{
-			if (loginid.contentEquals("koti") && Password.contentEquals("koti"))
+			HashMap<String, String> cred_map = connDao.getUserCredentials();
+			if(cred_map.keySet().contains(UserID) && cred_map.get(UserID).equals(Password))
 			{
 				return "userhome1.jsp";
 				//response.sendRedirect("userhome1.jsp");
 			}
 			else
 			{
-				response.sendRedirect("errorPage.jsp");
+				return "errorPage.jsp";
 			}
 		}
 		else if (RelationShip.contentEquals("Admin"))
 		{
-			if (loginid.contentEquals("admin") && Password.contentEquals("admin"))
+			if (UserID.contentEquals("admin") && Password.contentEquals("admin"))
 			{
-				response.sendRedirect("adminhome1.jsp");
+				return "adminhome1.jsp";
 			}
 			else
 			{
-				response.sendRedirect("errorPage.jsp");
+				return "errorPage.jsp";
 			}
 		}
 		else
 		{			
-			response.sendRedirect("errorPage.jsp");
-		}		
-	
-		return null;
+			return "errorPage.jsp";
+		}	
 	}
 	
-	private String placeloan(HttpServletRequest request, HttpServletResponse response) {
+	private String placeloan(HttpServletRequest request, HttpServletResponse response) throws SQLException {
 		// TODO Auto-generated method stub
 	/* write the code to place the loan information */
+		String LoanNumber=request.getParameter("LoanNumber");
+		String LoanPurpose = request.getParameter("LoanPurpose");
+		String LoanAmount = request.getParameter("LoanAmount");
+		String LoanAppliedDate = request.getParameter("LoanAppliedDate");
+		String BusinessStructure = request.getParameter("BusinessStructure");
+		String BillingIndicator = request.getParameter("BillingIndicator");
+		String TaxIndicator = request.getParameter("TaxIndicator");
+		String Address = request.getParameter("Address");
+		String EmailID = request.getParameter("EmailID");
+		String MobileNo = request.getParameter("MobileNo");
+		String LoanStatus = request.getParameter("LoanStatus");
+		//PrintWriter writer=response.getWriter();
 		
-		return null;
+		boolean resultFlag = connDao.insertLoanInfo(LoanNumber,LoanPurpose,LoanAmount,LoanAppliedDate,BusinessStructure,BillingIndicator, TaxIndicator,Address, EmailID,MobileNo,LoanStatus);		
+			
+		if(resultFlag)
+		{
+			request.setAttribute("state", "submitted");
+		}
+		else
+		{
+			request.setAttribute("state", "notSubmitted");
+		}
+		return "application.jsp";
 	}
 	
 	private String application1(HttpServletRequest request, HttpServletResponse response) {
 		// TODO Auto-generated method stub
 	/* write the code to display the loan application page */	
-		return "application.jsp";
+		return null;
 	}
 	private String editLoanProcess(HttpServletRequest request, HttpServletResponse response) throws SQLException {
 		// TODO Auto-generated method stub
@@ -176,8 +199,7 @@ public class UserController extends HttpServlet {
 		String DateOfBirth = request.getParameter("DateOfBirth");
 		String UserID = request.getParameter("UserID");
 		String Password = request.getParameter("Password");		
-	
-		connDao.insertUserInfo(FirstName,LastName,Gender,DateOfBirth,UserID,Password);		
+		connDao.insertUserInfo(FirstName,LastName,Gender,DateOfBirth,UserID,Password);	
 				
 		return "index.jsp";
 	}
@@ -213,32 +235,6 @@ public class UserController extends HttpServlet {
 	private String application(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		// TODO Auto-generated method stub
 	/* write a code to return to trackloan page */
-		String LoanName=request.getParameter("Loan Name");
-		String LoanAppliedAmount = request.getParameter("Loan Amount");
-		String DateofBirth = request.getParameter("Date of Birth");
-		String LoanApplicationDate = request.getParameter("Loan Application Date");
-		String BusinessStructure = request.getParameter("BusinessStructure");
-		String BillingIndicator = request.getParameter("Billing Indicator");
-		String TaxIndicator = request.getParameter("Tax Indicator");
-		String Address = request.getParameter("Address");
-		String AptName = request.getParameter("Apt Name");
-		String FlatNo = request.getParameter("Flat No");
-		String PlotNo = request.getParameter("Plot No");
-		String StreetNo = request.getParameter("Street No");
-		String Colony = request.getParameter("Colony");
-		String LandMar = request.getParameter("Land Mark");
-		String PinCode = request.getParameter("Pin Code");
-		PrintWriter writer=response.getWriter();		
-			if (true)
-			{
-				response.sendRedirect("applicationConfirmation.jsp");
-			} 
-			else
-			{
-				response.sendRedirect("errorPage.jsp");
-			}
-	
-	
-		return null;
+		return "trackloan.jsp";
 	}
 }

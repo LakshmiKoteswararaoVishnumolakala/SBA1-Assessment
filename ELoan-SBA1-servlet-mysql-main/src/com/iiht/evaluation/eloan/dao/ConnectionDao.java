@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.RequestDispatcher;
@@ -15,6 +16,7 @@ import com.iiht.evaluation.eloan.dto.LoanDto;
 import com.iiht.evaluation.eloan.model.ApprovedLoan;
 import com.iiht.evaluation.eloan.model.LoanInfo;
 import com.iiht.evaluation.eloan.model.User;
+import com.mysql.cj.xdevapi.Result;
 
 public class ConnectionDao 
 {
@@ -57,12 +59,11 @@ public class ConnectionDao
 	public void insertUserInfo(String FirstName,String LastName, String Gender,String DateOfBirth,String UserID,String Password) throws SQLException
 	{
 		String inserUserSQL = "insert into sba1dbschema.userinfo(FirstName,LastName,Gender,DateOfBirth,UserID,Password) values (?,?,?,?,?,?)";		
-	System.out.println(inserUserSQL);
+		//System.out.println(inserUserSQL);
 
 		jdbcConnection =this.connect();
-		System.out.println("hello");
-		PreparedStatement pstmt= jdbcConnection.prepareStatement(inserUserSQL);
-		
+		//System.out.println("hello");
+		PreparedStatement pstmt= jdbcConnection.prepareStatement(inserUserSQL);		
 		pstmt.setString(1,FirstName);
 		pstmt.setString(2,LastName);
 		pstmt.setString(3,Gender);
@@ -70,12 +71,142 @@ public class ConnectionDao
 		pstmt.setString(5,UserID);
 		pstmt.setString(6,Password);	
 		
-		pstmt.execute();
+		pstmt.execute();		
+		pstmt.close();
 		
-		pstmt.close();		
-		
-		this.disconnect();
-		
+		this.disconnect();		
 	}
+	
+	public boolean insertLoanInfo(String loanNumber, String loanPurpose, String loanAmount, String loanAppliedDate,
+			String businessStructure, String billingIndicator, String taxIndicator, String address, String emailID,
+			String mobileNo, String loanStatus) 
+	{
+		boolean resultFlag;
+		String insertLoanInfoSQL = "insert into sba1dbschema.LoanInfo(LoanNumber,LoanPurpose, LoanAmount,LoanAppliedDate,BusinessStructure,BillingIndicator, TaxIndicator,Address, EmailID, MobileNo,LoanStatus)\r\n" + 
+				"values(?,?,?,?,?,?,?,?,?,?,?);";		
+		//System.out.println(inserUserSQL);
+
+		try {
+			jdbcConnection =this.connect();
+			PreparedStatement pstmt= jdbcConnection.prepareStatement(insertLoanInfoSQL);		
+			pstmt.setString(1,loanNumber);
+			pstmt.setString(2,loanPurpose);
+			pstmt.setString(3,loanAmount);
+			pstmt.setString(4,loanAppliedDate);
+			pstmt.setString(5,businessStructure);
+			pstmt.setString(6,billingIndicator);	
+			pstmt.setString(7,taxIndicator);
+			pstmt.setString(8,address);
+			pstmt.setString(9,emailID);
+			pstmt.setString(10,mobileNo);
+			pstmt.setString(11,loanStatus);
+			
+			pstmt.execute();		
+			pstmt.close();
+			resultFlag =true;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			resultFlag = false;
+		}
+		//System.out.println("hello");
+		finally
+		{
+			try 
+			{
+				this.disconnect();
+			} 
+			catch (SQLException e) 
+			{
+				System.out.println("Error : "+ e.getMessage());
+			}
+		}
+		
+		return  resultFlag;
+	}
+	
+	
+	
+	 
+	
+	
+	public HashMap<String, String> getUserCredentials()
+	{
+		Statement stmt = null;
+		HashMap<String, String> cred_map = new HashMap<String, String>();
+		String getUserCred = "select UserID, Password from sba1dbschema.userinfo";
+
+		try 
+		{
+			jdbcConnection =this.connect();
+			stmt = jdbcConnection.createStatement();
+			ResultSet rs= stmt.executeQuery(getUserCred);
+			while(rs.next())
+			{
+				cred_map.put(rs.getString("UserID"), rs.getString("Password"));
+			}
+			return cred_map;
+		} 
+		catch(Exception e)
+		{
+			System.out.println("Unable to fetch User credential data");
+			System.out.println("Error : "+e.getMessage());
+			return cred_map;
+		}
+		finally 
+		{
+			try 
+			{
+				stmt.close();
+				this.disconnect();
+			} 
+			catch (SQLException e) 
+			{
+				System.out.println("Error : "+ e.getMessage());
+			}
+		}	
+	}
+	
+
+	static final String GetLoanStatus = "select LoanStatus from LoanInfo where LoanNumber='%s'";
+	public String getLoanStatus(String LoanNumber) 
+	{	
+		Connection conn = null;
+		Statement stmt = null;
+		String LoanStatus = null;	
+		 try 
+		 {
+	        	jdbcConnection = this.connect();
+	        	stmt = jdbcConnection.createStatement();
+	        	ResultSet rs = stmt.executeQuery(String.format(GetLoanStatus, LoanNumber));        	
+	        	while(rs.next())
+	        	{
+					System.out.println(rs.getString("LoanStatus"));
+					
+					LoanStatus = rs.getString("LoanStatus");
+					System.out.println("Loan "+LoanNumber+" is :" + LoanStatus);
+				}
+				return LoanStatus;
+		 }
+	     catch(Exception e) 
+		 {
+	        	System.out.println("Unable to fetch Loan status");
+	        	System.out.println("Error : "+e.getMessage());
+				return LoanStatus;
+	     }
+	        finally 
+			{
+				try 
+				{
+					stmt.close();
+					this.disconnect();
+				} 
+				catch (SQLException e) 
+				{
+					System.out.println("Error : "+ e.getMessage());
+				}
+			}
+	 }
+
 	
 }
